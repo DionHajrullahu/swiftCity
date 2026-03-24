@@ -49,26 +49,53 @@ export default function ReviewerDashboard() {
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchRecommendations = useCallback(async (jwt: string) => {
-    const res = await fetch("/api/recommendations", {
-      headers: { Authorization: `Bearer ${jwt}` },
-    });
-    const json = await res.json();
-    if (json.data) setRecommendations(json.data);
+    try {
+      const res = await fetch("/api/recommendations", {
+        headers: { Authorization: `Bearer ${jwt}` },
+      });
+      const json = await res.json();
+      if (json.data) setRecommendations(json.data);
+    } catch {
+      // silently fail — user still sees empty state
+    }
   }, []);
 
   useEffect(() => {
-    const init = async () => {
+    // First check if there's already a session
+    const initSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+
+      if (session) {
+        setUserEmail(session.user.email ?? "");
+        setToken(session.access_token);
+        await fetchRecommendations(session.access_token);
+        setLoading(false);
+      } else {
+        // No session found — redirect to login
         router.replace("/reviewer/login");
-        return;
       }
-      setUserEmail(session.user.email ?? "");
-      setToken(session.access_token);
-      await fetchRecommendations(session.access_token);
-      setLoading(false);
     };
-    init();
+
+    initSession();
+
+    // Also listen for auth state changes (handles the case where
+    // the session arrives slightly after the page loads)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === "SIGNED_IN" && session) {
+          setUserEmail(session.user.email ?? "");
+          setToken(session.access_token);
+          await fetchRecommendations(session.access_token);
+          setLoading(false);
+        } else if (event === "SIGNED_OUT") {
+          router.replace("/reviewer/login");
+        }
+      }
+    );
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [router, fetchRecommendations]);
 
   const handleLogout = async () => {
@@ -111,7 +138,6 @@ export default function ReviewerDashboard() {
     setShowForm(false);
     setSubmitting(false);
     await fetchRecommendations(token);
-
     setTimeout(() => setSuccessMsg(""), 5000);
   };
 
@@ -129,14 +155,20 @@ export default function ReviewerDashboard() {
   const getCategoryMeta = (cat: string) =>
     CATEGORIES.find((c) => c.value === cat) ?? CATEGORIES[0];
 
+  // ── Loading state ──────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#f2f0eb] flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-[#3bbfb3]/30 border-t-[#3bbfb3] rounded-full animate-spin" />
+      <div
+        className="min-h-screen bg-[#f2f0eb] flex flex-col items-center justify-center gap-4"
+        style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
+      >
+        <div className="w-10 h-10 border-4 border-[#3bbfb3]/30 border-t-[#3bbfb3] rounded-full animate-spin" />
+        <p className="text-gray-400 text-sm">Loading your dashboard…</p>
       </div>
     );
   }
 
+  // ── Dashboard ──────────────────────────────────────────────────────────────
   return (
     <div
       className="min-h-screen bg-[#f2f0eb]"
@@ -166,7 +198,7 @@ export default function ReviewerDashboard() {
       </nav>
 
       <div className="max-w-4xl mx-auto px-4 py-10">
-        {/* ── Header ── */}
+        {/* ── Page header ── */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Your Recommendations</h1>
@@ -199,7 +231,6 @@ export default function ReviewerDashboard() {
           >
             <h2 className="font-bold text-gray-900 text-lg">New recommendation</h2>
 
-            {/* City + Category row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
@@ -242,7 +273,6 @@ export default function ReviewerDashboard() {
               </div>
             </div>
 
-            {/* Name */}
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                 Place name <span className="text-red-400">*</span>
@@ -252,12 +282,11 @@ export default function ReviewerDashboard() {
                 type="text"
                 value={form.name}
                 onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                placeholder="e.g. Café Central, Schönbrunn Palace, Secret rooftop bar…"
+                placeholder="e.g. Café Central, Schönbrunn Palace…"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-gray-800 text-sm outline-none focus:ring-2 focus:ring-[#3bbfb3]"
               />
             </div>
 
-            {/* Description */}
             <div>
               <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">
                 Description <span className="text-red-400">*</span>
@@ -272,7 +301,6 @@ export default function ReviewerDashboard() {
               />
             </div>
 
-            {/* Address + Tips row */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">

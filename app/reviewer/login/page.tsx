@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { LogIn, Eye, EyeOff, Globe } from "lucide-react";
+import { LogIn, Eye, EyeOff, Globe, ArrowLeft } from "lucide-react";
 
 export default function ReviewerLoginPage() {
   const router = useRouter();
@@ -20,23 +20,40 @@ export default function ReviewerLoginPage() {
     setLoading(true);
     setError("");
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
 
-    if (error) {
-      setError(error.message);
-      setLoading(false);
-    } else {
+      if (signInError) {
+        setError(signInError.message);
+        setLoading(false);
+        return;
+      }
+
+      if (!data.session) {
+        setError("Login failed — no session returned. Please try again.");
+        setLoading(false);
+        return;
+      }
+
       router.push("/reviewer/dashboard");
+      router.refresh();
+    } catch {
+      setError("Something went wrong. Please try again.");
+      setLoading(false);
     }
   };
 
   return (
     <div
-      className="min-h-screen flex items-center justify-center bg-[#0d2b3e] px-4"
+      className="min-h-screen flex items-center justify-center bg-[#0d2b3e] px-4 py-10"
       style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
     >
-      {/* Background texture */}
-      <div className="absolute inset-0 opacity-10"
+      {/* Background */}
+      <div
+        className="absolute inset-0 opacity-10"
         style={{
           backgroundImage: "url('https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1600&q=80')",
           backgroundSize: "cover",
@@ -45,7 +62,16 @@ export default function ReviewerLoginPage() {
       />
 
       <div className="relative w-full max-w-md">
-        {/* Card */}
+
+        {/* ── Back to home ── */}
+        <button
+          onClick={() => router.push("/")}
+          className="flex items-center gap-2 text-white/50 hover:text-white text-sm mb-6 transition-colors"
+        >
+          <ArrowLeft size={14} />
+          Back to home
+        </button>
+
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
           {/* Header */}
           <div className="bg-[#0d2b3e] px-8 py-10 text-center">
@@ -118,8 +144,8 @@ export default function ReviewerLoginPage() {
 
             <p className="text-center text-xs text-gray-400 pt-2">
               Don&apos;t have an account?{" "}
-              <a href="mailto:hello@mrinternational.com" className="text-[#3bbfb3] hover:underline">
-                Contact us to get access
+              <a href="/reviewer/signup" className="text-[#3bbfb3] hover:underline font-medium">
+                Apply to become a reviewer
               </a>
             </p>
           </form>
