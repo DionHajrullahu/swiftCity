@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { LogIn, Eye, EyeOff, Globe, ArrowLeft } from "lucide-react";
+import { LogIn, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 export default function ReviewerLoginPage() {
   const router = useRouter();
@@ -20,30 +20,36 @@ export default function ReviewerLoginPage() {
     setLoading(true);
     setError("");
 
-    try {
-      const { data, error: signInError } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password,
-      });
+    const { data, error: signInError } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    });
 
-      if (signInError) {
+    if (signInError) {
+      // Give a clear, specific error instead of a generic one
+      if (
+        signInError.message.toLowerCase().includes("invalid") ||
+        signInError.message.toLowerCase().includes("credentials") ||
+        signInError.message.toLowerCase().includes("password")
+      ) {
+        setError("Incorrect email or password. Please try again.");
+      } else if (signInError.message.toLowerCase().includes("email")) {
+        setError("Please enter a valid email address.");
+      } else {
         setError(signInError.message);
-        setLoading(false);
-        return;
       }
-
-      if (!data.session) {
-        setError("Login failed — no session returned. Please try again.");
-        setLoading(false);
-        return;
-      }
-
-      router.push("/reviewer/dashboard");
-      router.refresh();
-    } catch {
-      setError("Something went wrong. Please try again.");
       setLoading(false);
+      return;
     }
+
+    if (!data.session) {
+      setError("Login failed — no session returned. Please try again.");
+      setLoading(false);
+      return;
+    }
+
+    router.push("/reviewer/dashboard");
+    router.refresh();
   };
 
   return (
@@ -51,7 +57,6 @@ export default function ReviewerLoginPage() {
       className="min-h-screen flex items-center justify-center bg-[#0d2b3e] px-4 py-10"
       style={{ fontFamily: "'Georgia', 'Times New Roman', serif" }}
     >
-      {/* Background */}
       <div
         className="absolute inset-0 opacity-10"
         style={{
@@ -62,8 +67,7 @@ export default function ReviewerLoginPage() {
       />
 
       <div className="relative w-full max-w-md">
-
-        {/* ── Back to home ── */}
+        {/* Back to home */}
         <button
           onClick={() => router.push("/")}
           className="flex items-center gap-2 text-white/50 hover:text-white text-sm mb-6 transition-colors"
@@ -76,10 +80,10 @@ export default function ReviewerLoginPage() {
           {/* Header */}
           <div className="bg-[#0d2b3e] px-8 py-10 text-center">
             <div className="w-14 h-14 bg-[#3bbfb3]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <Globe size={28} className="text-[#3bbfb3]" />
+              <span className="text-[#3bbfb3] text-2xl font-bold">S</span>
             </div>
             <h1 className="text-2xl font-bold text-white mb-1">Reviewer Portal</h1>
-            <p className="text-white/50 text-sm">Mr. International · Local Contributors</p>
+            <p className="text-white/50 text-sm">SwiftCity · Local Contributors</p>
           </div>
 
           {/* Form */}
@@ -152,7 +156,7 @@ export default function ReviewerLoginPage() {
         </div>
 
         <p className="text-center text-white/30 text-xs mt-6">
-          © {new Date().getFullYear()} Mr. International
+          © {new Date().getFullYear()} SwiftCity
         </p>
       </div>
     </div>

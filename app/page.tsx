@@ -10,12 +10,12 @@ import {
 import type { Recommendation } from "@/lib/supabase";
 
 const FEATURED_CITIES = [
-  { name: "Vienna", country: "Austria", location: [48.2082, 16.3738] as [number, number], image: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=800&q=80" },
-  { name: "Lisbon", country: "Portugal", location: [38.7169, -9.1395] as [number, number], image: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=800&q=80" },
-  { name: "Kyoto", country: "Japan", location: [35.0116, 135.7681] as [number, number], image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=800&q=80" },
-  { name: "Barcelona", country: "Spain", location: [41.3851, 2.1734] as [number, number], image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=800&q=80" },
-  { name: "Copenhagen", country: "Denmark", location: [55.6761, 12.5683] as [number, number], image: "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?w=800&q=80" },
-  { name: "Buenos Aires", country: "Argentina", location: [-34.6037, -58.3816] as [number, number], image: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=800&q=80" },
+  { name: "Vienna", country: "Austria", location: [48.2082, 16.3738] as [number, number], image: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=600&q=80" },
+  { name: "Lisbon", country: "Portugal", location: [38.7169, -9.1395] as [number, number], image: "https://images.unsplash.com/photo-1555881400-74d7acaacd8b?w=600&q=80" },
+  { name: "Kyoto", country: "Japan", location: [35.0116, 135.7681] as [number, number], image: "https://images.unsplash.com/photo-1493976040374-85c8e12f0c0e?w=600&q=80" },
+  { name: "Barcelona", country: "Spain", location: [41.3851, 2.1734] as [number, number], image: "https://images.unsplash.com/photo-1583422409516-2895a77efded?w=600&q=80" },
+  { name: "Copenhagen", country: "Denmark", location: [55.6761, 12.5683] as [number, number], image: "https://images.unsplash.com/photo-1513622470522-26c3c8a854bc?w=600&q=80" },
+  { name: "Buenos Aires", country: "Argentina", location: [-34.6037, -58.3816] as [number, number], image: "https://images.unsplash.com/photo-1589909202802-8f4aadce1849?w=600&q=80" },
 ];
 
 const TRUST_FEATURES = [
@@ -28,12 +28,12 @@ const TRUST_FEATURES = [
 const QUICK_CITIES = ["Vienna", "Lisbon", "Kyoto"];
 
 const CATEGORY_META: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
-  restaurant: { label: "Restaurant / Café", icon: <UtensilsCrossed size={13} />, color: "bg-orange-100 text-orange-600" },
-  activity: { label: "Activity / Sight", icon: <Compass size={13} />, color: "bg-blue-100 text-blue-600" },
-  hidden_gem: { label: "Hidden Gem", icon: <Sparkles size={13} />, color: "bg-purple-100 text-purple-600" },
+  restaurant: { label: "Restaurant / Café", icon: <UtensilsCrossed size={14} />, color: "bg-orange-100 text-orange-600" },
+  activity: { label: "Activity / Sight", icon: <Compass size={14} />, color: "bg-blue-100 text-blue-600" },
+  hidden_gem: { label: "Hidden Gem", icon: <Sparkles size={14} />, color: "bg-purple-100 text-purple-600" },
 };
 
-// ── COBE Globe ───────────────────────────────────────────────────────────────
+// ── Globe ────────────────────────────────────────────────────────────────────
 function Globe({ darkMode }: { darkMode: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const pointerInteracting = useRef<number | null>(null);
@@ -96,7 +96,7 @@ function Globe({ darkMode }: { darkMode: boolean }) {
   );
 }
 
-// ── Search Results Dropdown ──────────────────────────────────────────────────
+// ── Search Results ───────────────────────────────────────────────────────────
 function SearchResults({
   results, loading, query, onClose, onCityClick,
 }: {
@@ -109,12 +109,12 @@ function SearchResults({
   if (!query) return null;
 
   return (
-    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 max-h-[70vh] overflow-y-auto">
+    <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50 max-h-96 overflow-y-auto">
       <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
         <p className="text-xs text-gray-400 font-medium">
           {loading ? "Searching…" : `${results.length} result${results.length !== 1 ? "s" : ""} for "${query}"`}
         </p>
-        <button onClick={onClose} className="text-gray-300 hover:text-gray-500 p-1">
+        <button onClick={onClose} className="text-gray-300 hover:text-gray-500">
           <X size={14} />
         </button>
       </div>
@@ -127,7 +127,7 @@ function SearchResults({
 
       {!loading && results.length === 0 && (
         <div className="py-10 text-center text-gray-400 text-sm px-4">
-          <p className="font-medium mb-1">No recommendations found</p>
+          <p className="font-medium mb-1">No results found</p>
           <p className="text-xs">Try a city like "Vienna" or an interest like "cafes"</p>
         </div>
       )}
@@ -138,7 +138,6 @@ function SearchResults({
             const cityResults = results.filter((r) => r.city === city);
             return (
               <div key={city}>
-                {/* City group header */}
                 <button
                   onClick={() => onCityClick(city)}
                   className="w-full flex items-center justify-between px-5 py-2.5 bg-gray-50 hover:bg-[#d6f0ed] transition-colors border-b border-gray-100 group"
@@ -153,8 +152,7 @@ function SearchResults({
                   </span>
                 </button>
 
-                {/* Individual items */}
-                {cityResults.map((r) => {
+                {cityResults.slice(0, 3).map((r) => {
                   const cat = CATEGORY_META[r.category] ?? CATEGORY_META.hidden_gem;
                   return (
                     <button
@@ -175,11 +173,6 @@ function SearchResults({
                             <MapPin size={10} /> {r.city}, {r.country}
                           </p>
                           <p className="text-sm text-gray-500 mt-1 line-clamp-2">{r.description}</p>
-                          {r.tips && (
-                            <p className="text-xs text-purple-500 mt-1 flex items-center gap-1">
-                              <Sparkles size={10} /> {r.tips}
-                            </p>
-                          )}
                         </div>
                       </div>
                     </button>
@@ -189,7 +182,7 @@ function SearchResults({
             );
           })}
           <div className="px-5 py-3 bg-gray-50 border-t border-gray-100 text-center">
-            <p className="text-xs text-gray-400">Click a result or city to see all recommendations</p>
+            <p className="text-xs text-gray-400">Click a city to see all recommendations</p>
           </div>
         </>
       )}
@@ -212,7 +205,6 @@ export default function HomePage() {
     document.body.style.background = darkMode ? "#030712" : "#f2f0eb";
   }, [darkMode]);
 
-  // Debounced live search
   useEffect(() => {
     if (searchRef.current) clearTimeout(searchRef.current);
     if (!query.trim()) { setShowResults(false); setSearchResults([]); return; }
@@ -261,7 +253,6 @@ export default function HomePage() {
           {darkMode ? <Sun size={16} /> : <Moon size={16} />}
         </button>
 
-        {/* Desktop */}
         <button
           onClick={() => router.push("/reviewer/login")}
           className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/30 text-white text-sm font-medium hover:bg-white/20 transition-colors"
@@ -270,7 +261,6 @@ export default function HomePage() {
           Reviewer Login
         </button>
 
-        {/* Mobile hamburger */}
         <button
           onClick={() => setMenuOpen(true)}
           className="sm:hidden w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 flex items-center justify-center text-white"
@@ -279,7 +269,7 @@ export default function HomePage() {
         </button>
       </div>
 
-      {/* Mobile menu overlay */}
+      {/* Mobile menu */}
       {menuOpen && (
         <div className="fixed inset-0 z-50 bg-[#0d2b3e]/97 flex flex-col items-center justify-center gap-6">
           <button onClick={() => setMenuOpen(false)} className="absolute top-5 right-5 text-white/60 hover:text-white">
@@ -305,7 +295,7 @@ export default function HomePage() {
         />
         <div className={`absolute inset-0 transition-colors duration-500 ${darkMode ? "bg-gray-950/90" : "bg-[#0d2b3e]/70"}`} />
 
-        <div className="relative z-10 w-full max-w-4xl mx-auto">
+        <div className="relative z-10 max-w-3xl mx-auto w-full">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight mb-4 sm:mb-6">
             Discover cities through{" "}
             <span className="text-[#3bbfb3]">local eyes</span>
@@ -314,14 +304,13 @@ export default function HomePage() {
             Skip the tourist traps. Find places locals actually love—verified recommendations for every interest.
           </p>
 
-          {/* Search */}
           <form onSubmit={handleSearch} className="relative max-w-2xl mx-auto mb-5 sm:mb-6">
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by city or interest…"
-              className="w-full px-5 sm:px-6 py-3.5 sm:py-4 pr-14 rounded-2xl text-gray-800 bg-white shadow-2xl text-sm sm:text-base outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-[#3bbfb3]"
+              placeholder="Search by city or interest (e.g., Vienna, quiet cafes, local food)"
+              className="w-full px-5 sm:px-6 py-3.5 sm:py-4 pr-14 sm:pr-16 rounded-2xl text-gray-800 bg-white shadow-2xl text-sm sm:text-base outline-none placeholder:text-gray-400 focus:ring-2 focus:ring-[#3bbfb3]"
               autoComplete="off"
             />
             <button
@@ -341,7 +330,6 @@ export default function HomePage() {
             {showResults && <div className="fixed inset-0 z-40" onClick={() => setShowResults(false)} />}
           </form>
 
-          {/* Quick chips — now navigate to city page */}
           <div className="flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
             <span className="text-white/60 text-sm">Try:</span>
             {QUICK_CITIES.map((city) => (
@@ -358,23 +346,19 @@ export default function HomePage() {
       </section>
 
       {/* ── Globe Section ── */}
-      <section className={`py-16 sm:py-24 px-4 sm:px-6 overflow-hidden ${darkMode ? "bg-gray-950" : "bg-[#f2f0eb]"}`}>
+      <section className={`py-24 px-6 overflow-hidden ${darkMode ? "bg-gray-950" : "bg-[#f2f0eb]"}`}>
         <div className="max-w-6xl mx-auto">
-          <div className="flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
-
-            {/* Text — stacks above globe on mobile */}
-            <div className="lg:w-2/5 text-left w-full">
-              <p className={`text-xs sm:text-sm font-semibold tracking-widest uppercase mb-3 sm:mb-4 ${darkMode ? "text-[#3bbfb3]" : "text-[#2da89d]"}`}>
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            <div className="lg:w-2/5 text-left">
+              <p className={`text-sm font-semibold tracking-widest uppercase mb-4 ${darkMode ? "text-[#3bbfb3]" : "text-[#2da89d]"}`}>
                 Our Coverage
               </p>
-              <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 sm:mb-6 leading-tight ${darkMode ? "text-white" : "text-gray-900"}`}>
+              <h2 className={`text-4xl md:text-5xl font-bold mb-6 leading-tight ${darkMode ? "text-white" : "text-gray-900"}`}>
                 Local guides across the globe
               </h2>
-              <p className={`text-sm sm:text-base leading-relaxed mb-6 sm:mb-8 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+              <p className={`text-base leading-relaxed mb-8 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
                 Each red dot marks a city where we have verified local contributors. Drag the globe to explore.
               </p>
-
-              {/* City list — clickable */}
               <ul className="grid grid-cols-2 gap-2">
                 {FEATURED_CITIES.map((city) => (
                   <li key={city.name}>
@@ -390,20 +374,9 @@ export default function HomePage() {
                 ))}
               </ul>
             </div>
-
-            {/* Globe — scales with screen */}
-            <div className="lg:w-3/5 flex items-center justify-center w-full">
-              <div
-                className="relative"
-                style={{
-                  width: "min(560px, 90vw)",
-                  height: "min(560px, 90vw)",
-                }}
-              >
-                <div
-                  className="absolute inset-0 rounded-full opacity-20 blur-3xl"
-                  style={{ background: "radial-gradient(circle, #3bbfb3 0%, transparent 70%)" }}
-                />
+            <div className="lg:w-3/5 flex items-center justify-center">
+              <div className="relative" style={{ width: "min(520px, 90vw)", height: "min(520px, 90vw)" }}>
+                <div className="absolute inset-0 rounded-full opacity-20 blur-3xl" style={{ background: "radial-gradient(circle, #3bbfb3 0%, transparent 70%)" }} />
                 <Globe darkMode={darkMode} />
               </div>
             </div>
@@ -412,23 +385,23 @@ export default function HomePage() {
       </section>
 
       {/* ── Trust Section ── */}
-      <section className={`py-16 sm:py-24 px-4 sm:px-6 ${darkMode ? "bg-gray-900" : "bg-[#eceae4]"}`}>
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
-            Why travelers trust Mr. International
+      <section className={`py-24 px-6 ${darkMode ? "bg-gray-900" : "bg-[#eceae4]"}`}>
+        <div className="max-w-5xl mx-auto text-center">
+          {/* ← SwiftCity branding */}
+          <h2 className={`text-4xl md:text-5xl font-bold mb-4 ${darkMode ? "text-white" : "text-gray-900"}`}>
+            Why travelers trust SwiftCity
           </h2>
-          <p className={`text-base sm:text-lg mb-12 sm:mb-16 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+          <p className={`text-lg mb-16 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
             We cut through the noise to help you discover authentic experiences, fast.
           </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {TRUST_FEATURES.map(({ icon: Icon, title, description }) => (
               <div key={title} className="flex flex-col items-center text-center">
-                <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-2xl bg-[#d6f0ed] flex items-center justify-center mb-4">
-                  <Icon size={26} className="text-[#3bbfb3]" />
+                <div className="w-16 h-16 rounded-2xl bg-[#d6f0ed] flex items-center justify-center mb-4">
+                  <Icon size={24} className="text-[#3bbfb3]" />
                 </div>
-                <h3 className={`font-semibold text-base lg:text-lg mb-2 ${darkMode ? "text-white" : "text-gray-900"}`}>{title}</h3>
-                <p className={`text-sm lg:text-base leading-relaxed ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{description}</p>
+                <h3 className={`font-semibold text-base mb-2 ${darkMode ? "text-white" : "text-gray-900"}`}>{title}</h3>
+                <p className={`text-sm leading-relaxed ${darkMode ? "text-gray-400" : "text-gray-500"}`}>{description}</p>
               </div>
             ))}
           </div>
@@ -436,32 +409,27 @@ export default function HomePage() {
       </section>
 
       {/* ── Featured Cities ── */}
-      <section className={`pb-16 sm:pb-24 px-4 sm:px-6 ${darkMode ? "bg-gray-900" : "bg-[#eceae4]"}`}>
-        <div className="max-w-6xl mx-auto">
-          <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 ${darkMode ? "text-white" : "text-gray-900"}`}>
+      <section className={`pb-24 px-6 ${darkMode ? "bg-gray-900" : "bg-[#eceae4]"}`}>
+        <div className="max-w-5xl mx-auto">
+          <h2 className={`text-4xl md:text-5xl font-bold mb-2 ${darkMode ? "text-white" : "text-gray-900"}`}>
             Explore featured cities
           </h2>
-          <p className={`text-sm sm:text-base mb-8 sm:mb-10 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
+          <p className={`text-base mb-10 ${darkMode ? "text-gray-400" : "text-gray-500"}`}>
             Start with locals&apos; favorites from these destinations
           </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {FEATURED_CITIES.map(({ name, country, image }) => (
               <article
                 key={name}
                 onClick={() => handleCityClick(name)}
-                className="group relative rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
+                className="group relative rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-shadow duration-300"
                 style={{ aspectRatio: "4/3" }}
               >
-                <img
-                  src={image}
-                  alt={`${name}, ${country}`}
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 lg:p-6">
-                  <h3 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight">{name}</h3>
-                  <p className="text-white/70 text-sm lg:text-base mb-2 sm:mb-3">{country}</p>
+                <img src={image} alt={`${name}, ${country}`} className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-5">
+                  <h3 className="text-2xl font-bold text-white leading-tight">{name}</h3>
+                  <p className="text-white/70 text-sm mb-3">{country}</p>
                   <span className="flex items-center gap-1.5 text-white text-sm font-medium group-hover:gap-3 transition-all duration-200">
                     Explore <ArrowRight size={14} />
                   </span>
@@ -473,8 +441,9 @@ export default function HomePage() {
       </section>
 
       {/* ── Footer ── */}
-      <footer className={`py-6 sm:py-8 px-6 border-t text-center text-sm ${darkMode ? "bg-gray-950 border-gray-800 text-gray-500" : "bg-[#eceae4] border-gray-200 text-gray-400"}`}>
-        © {new Date().getFullYear()} Mr. International · Discover cities through local eyes
+      {/* ← SwiftCity branding */}
+      <footer className={`py-8 px-6 border-t text-center text-sm ${darkMode ? "bg-gray-950 border-gray-800 text-gray-500" : "bg-[#eceae4] border-gray-200 text-gray-400"}`}>
+        © {new Date().getFullYear()} SwiftCity · Discover cities through local eyes
       </footer>
     </div>
   );
