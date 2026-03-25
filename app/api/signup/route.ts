@@ -1,16 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-// Use service role here so we can create the profile after signup
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export const dynamic = "force-dynamic";
+
+// Lazy — only created when the route is actually called, not at build time
+function getAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+}
 
 export async function POST(req: NextRequest) {
   try {
+    const supabaseAdmin = getAdmin();
     const formData = await req.formData();
 
     const fullName = formData.get("fullName") as string;
@@ -19,7 +22,6 @@ export async function POST(req: NextRequest) {
     const cityCovered = formData.get("cityCovered") as string;
     const idPhoto = formData.get("idPhoto") as File | null;
 
-    // Validate required fields
     if (!fullName || !email || !password || !cityCovered || !idPhoto) {
       return NextResponse.json(
         { error: "All fields including ID photo are required." },
@@ -38,7 +40,7 @@ export async function POST(req: NextRequest) {
     const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
-      email_confirm: true, // skip email confirmation
+      email_confirm: true,
     });
 
     if (authError) {
@@ -53,7 +55,7 @@ export async function POST(req: NextRequest) {
 
     const userId = authData.user.id;
 
-    // 2. Upload ID photo to Supabase Storage
+    // 2. Upload ID photo
     const fileExt = idPhoto.name.split(".").pop();
     const filePath = `${userId}/id-document.${fileExt}`;
     const arrayBuffer = await idPhoto.arrayBuffer();
@@ -67,7 +69,6 @@ export async function POST(req: NextRequest) {
       });
 
     if (uploadError) {
-      // Delete the user if upload failed to avoid orphaned accounts
       await supabaseAdmin.auth.admin.deleteUser(userId);
       return NextResponse.json(
         { error: "ID photo upload failed. Please try again." },
@@ -75,7 +76,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Create the reviewer profile (approved: false by default)
+    // 3. Create reviewer profile
     const { error: profileError } = await supabaseAdmin
       .from("reviewer_profiles")
       .insert({
