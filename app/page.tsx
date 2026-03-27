@@ -8,6 +8,7 @@ import {
   Moon, Sun, LogIn, MapPin, UtensilsCrossed, Compass, Sparkles, X, Menu,
 } from "lucide-react";
 import type { Recommendation } from "@/lib/supabase";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const FEATURED_CITIES = [
   { name: "Vienna", country: "Austria", location: [48.2082, 16.3738] as [number, number], image: "https://images.unsplash.com/photo-1516550893923-42d28e5677af?w=600&q=80" },

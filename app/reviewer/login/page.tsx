@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@supabase/supabase-js";
 import { LogIn, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 export default function ReviewerLoginPage() {
@@ -20,36 +20,52 @@ export default function ReviewerLoginPage() {
     setLoading(true);
     setError("");
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    });
+    try {
+      // Create client directly here — avoids any proxy issues
+      const supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      );
 
-    if (signInError) {
-      // Give a clear, specific error instead of a generic one
-      if (
-        signInError.message.toLowerCase().includes("invalid") ||
-        signInError.message.toLowerCase().includes("credentials") ||
-        signInError.message.toLowerCase().includes("password")
-      ) {
-        setError("Incorrect email or password. Please try again.");
-      } else if (signInError.message.toLowerCase().includes("email")) {
-        setError("Please enter a valid email address.");
-      } else {
-        setError(signInError.message);
+      // Race against a 10-second timeout so it never hangs forever
+      const result = await Promise.race([
+        supabase.auth.signInWithPassword({
+          email: email.trim().toLowerCase(),
+          password,
+        }),
+        new Promise<never>((_, reject) =>
+          setTimeout(() => reject(new Error("Request timed out. Check your connection.")), 10000)
+        ),
+      ]);
+
+      const { data, error: signInError } = result as Awaited<
+        ReturnType<typeof supabase.auth.signInWithPassword>
+      >;
+
+      if (signInError) {
+        setError(
+          signInError.message.includes("Invalid")
+            ? "Incorrect email or password."
+            : signInError.message
+        );
+        setLoading(false);
+        return;
       }
-      setLoading(false);
-      return;
-    }
 
-    if (!data.session) {
-      setError("Login failed — no session returned. Please try again.");
-      setLoading(false);
-      return;
-    }
+      if (!data.session) {
+        setError("No session returned. Please try again.");
+        setLoading(false);
+        return;
+      }
 
-    router.push("/reviewer/dashboard");
-    router.refresh();
+      // Success — go to dashboard
+      router.push("/reviewer/dashboard");
+      router.refresh();
+
+    } catch (err: any) {
+      setError(err?.message ?? "Something went wrong. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
@@ -67,7 +83,6 @@ export default function ReviewerLoginPage() {
       />
 
       <div className="relative w-full max-w-md">
-        {/* Back to home */}
         <button
           onClick={() => router.push("/")}
           className="flex items-center gap-2 text-white/50 hover:text-white text-sm mb-6 transition-colors"
@@ -137,7 +152,10 @@ export default function ReviewerLoginPage() {
               className="w-full bg-[#3bbfb3] hover:bg-[#2da89d] disabled:opacity-60 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 transition-colors"
             >
               {loading ? (
-                <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                <>
+                  <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
+                  <span className="text-sm">Signing in…</span>
+                </>
               ) : (
                 <>
                   <LogIn size={16} />
