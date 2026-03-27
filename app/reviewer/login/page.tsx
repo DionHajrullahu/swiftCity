@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createClient } from "@supabase/supabase-js";
+import { supabase } from "@/lib/supabase";
 import { LogIn, Eye, EyeOff, ArrowLeft } from "lucide-react";
 
 export default function ReviewerLoginPage() {
@@ -20,31 +20,23 @@ export default function ReviewerLoginPage() {
     setLoading(true);
     setError("");
 
+    // Set a 10 second timeout so it never spins forever
+    const timeout = setTimeout(() => {
+      setError("Request timed out. Check your connection and try again.");
+      setLoading(false);
+    }, 10000);
+
     try {
-      // Create client directly here — avoids any proxy issues
-      const supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-      );
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      });
 
-      // Race against a 10-second timeout so it never hangs forever
-      const result = await Promise.race([
-        supabase.auth.signInWithPassword({
-          email: email.trim().toLowerCase(),
-          password,
-        }),
-        new Promise<never>((_, reject) =>
-          setTimeout(() => reject(new Error("Request timed out. Check your connection.")), 10000)
-        ),
-      ]);
-
-      const { data, error: signInError } = result as Awaited<
-        ReturnType<typeof supabase.auth.signInWithPassword>
-      >;
+      clearTimeout(timeout);
 
       if (signInError) {
         setError(
-          signInError.message.includes("Invalid")
+          signInError.message.toLowerCase().includes("invalid")
             ? "Incorrect email or password."
             : signInError.message
         );
@@ -58,11 +50,11 @@ export default function ReviewerLoginPage() {
         return;
       }
 
-      // Success — go to dashboard
       router.push("/reviewer/dashboard");
       router.refresh();
 
     } catch (err: any) {
+      clearTimeout(timeout);
       setError(err?.message ?? "Something went wrong. Please try again.");
       setLoading(false);
     }
@@ -92,7 +84,6 @@ export default function ReviewerLoginPage() {
         </button>
 
         <div className="bg-white rounded-3xl shadow-2xl overflow-hidden">
-          {/* Header */}
           <div className="bg-[#0d2b3e] px-8 py-10 text-center">
             <div className="w-14 h-14 bg-[#3bbfb3]/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
               <span className="text-[#3bbfb3] text-2xl font-bold">S</span>
@@ -101,7 +92,6 @@ export default function ReviewerLoginPage() {
             <p className="text-white/50 text-sm">SwiftCity · Local Contributors</p>
           </div>
 
-          {/* Form */}
           <form onSubmit={handleLogin} className="px-8 py-8 space-y-5">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">
