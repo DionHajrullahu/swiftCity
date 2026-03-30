@@ -68,6 +68,9 @@ function Globe({ darkMode }: { darkMode: boolean }) {
     const onResize = () => { if (canvasRef.current) width = canvasRef.current.offsetWidth; };
     window.addEventListener("resize", onResize);
     onResize();
+
+    // Fallback if canvas width is still 0 on first render
+    if (width === 0) width = canvasRef.current.offsetWidth || 500;
     const globe = createGlobe(canvasRef.current, {
       devicePixelRatio: 2, width: width * 2, height: width * 2,
       phi: 0, theta: 0.3,
