@@ -1,4 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
+import { createClient, SupabaseClient } from "@supabase/supabase-js";
 
 export type Category = "restaurant" | "activity" | "hidden_gem";
 
@@ -16,20 +16,37 @@ export type Recommendation = {
   approved: boolean;
 };
 
-let _client: ReturnType<typeof createClient> | null = null;
+// Singleton instance
+let _supabase: SupabaseClient | null = null;
 
-function getClient() {
-  if (!_client) {
-    _client = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+export function getSupabase(): SupabaseClient {
+  if (_supabase) return _supabase;
+
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    // Return a dummy during SSR/build — never called in browser if env vars set
+    _supabase = createClient(
+      "https://placeholder.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.placeholder"
     );
+    return _supabase;
   }
-  return _client;
+
+  _supabase = createClient(url, key, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+  });
+
+  return _supabase;
 }
 
-export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+// Named export so existing imports work unchanged
+export const supabase = new Proxy({} as SupabaseClient, {
   get(_target, prop) {
-    return (getClient() as any)[prop];
+    return (getSupabase() as any)[prop];
   },
 });
