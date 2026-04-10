@@ -360,7 +360,11 @@ export default function ReviewerSignupPage() {
 
             {/* Privacy note */}
             <p className="text-xs text-gray-400 leading-relaxed">
-              Your ID is stored securely and only used for verification. It will never be shared publicly or with third parties.
+              By submitting this application you agree to our{" "}
+              <a href="/terms" className="text-[#3bbfb3] hover:underline">Terms of Service</a>
+              {" "}and{" "}
+              <a href="/privacy" className="text-[#3bbfb3] hover:underline">Privacy Policy</a>.
+              Your ID is stored securely and used only for verification.
             </p>
 
             <button

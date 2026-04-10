@@ -448,6 +448,10 @@ export default function HomePage() {
       {/* ← SwiftCity branding */}
       <footer className={`py-8 px-6 border-t text-center text-sm ${darkMode ? "bg-gray-950 border-gray-800 text-gray-500" : "bg-[#eceae4] border-gray-200 text-gray-400"}`}>
         © {new Date().getFullYear()} SwiftCity · Discover cities through local eyes
+        <span className="mx-2">·</span>
+        <a href="/privacy" className="hover:underline">Privacy Policy</a>
+        <span className="mx-2">·</span>
+        <a href="/terms" className="hover:underline">Terms of Service</a>
       </footer>
     </div>
   );
