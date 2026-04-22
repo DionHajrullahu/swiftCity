@@ -256,8 +256,8 @@ export default function CityPlanPage() {
           <div className="space-y-8">
             {/* Preview teaser */}
             <div className="bg-white rounded-3xl p-6 sm:p-8 border border-gray-100 shadow-sm">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">What's inside</h2>
-              <p className="text-gray-500 text-sm mb-6">3 full days. Morning, afternoon and evening for each. Written by verified locals — not travel bloggers.</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Your 3-day " + cityName + " itinerary</h2>
+              <p className="text-gray-500 text-sm mb-6">Skip the planning. A complete 3-day schedule — morning, afternoon, and evening — so you just show up and enjoy. No research, no stress.</p>
 
               {/* Blurred preview of Day 1 */}
               <div className="relative rounded-2xl overflow-hidden">
@@ -275,14 +275,14 @@ export default function CityPlanPage() {
                 </div>
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/60 to-white flex items-end justify-center pb-6">
                   <div className="flex items-center gap-2 bg-[#0d2b3e] text-white px-4 py-2 rounded-full text-sm font-medium">
-                    <Lock size={14} /> Unlock to read full itinerary
+                    <Lock size={14} /> Get your itinerary
                   </div>
                 </div>
               </div>
 
               {/* What you get */}
               <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {["3 full days of local itineraries", "Morning, afternoon & evening picks", "Insider tips from verified residents"].map((item) => (
+                {["3 full days planned for you", "No research or planning needed", "Insider tips locals don't share online"].map((item) => (
                   <div key={item} className="flex items-start gap-2 text-sm text-gray-600">
                     <CheckCircle size={15} className="text-[#3bbfb3] flex-shrink-0 mt-0.5" />
                     {item}
@@ -330,7 +330,7 @@ export default function CityPlanPage() {
                   <span className="text-gray-400 text-sm ml-1">one-time</span>
                 </div>
                 <ul className="space-y-2 mb-6">
-                  {[`Full 3-day ${cityName} itinerary`, "Local tips for every stop", "Permanent access"].map((f) => (
+                  {[`3-day ${cityName} itinerary — done for you`, "Morning, afternoon & evening planned", "Permanent access, no subscription"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
                       <CheckCircle size={13} className="text-[#3bbfb3]" /> {f}
                     </li>
@@ -359,7 +359,7 @@ export default function CityPlanPage() {
                   <span className="text-white/50 text-sm ml-1">/month</span>
                 </div>
                 <ul className="space-y-2 mb-6">
-                  {["All 6 city plans included", "New cities added monthly", "Cancel anytime"].map((f) => (
+                  {["All 6 cities — fully planned trips", "New cities added every month", "Cancel anytime"].map((f) => (
                     <li key={f} className="flex items-center gap-2 text-sm text-white/80">
                       <CheckCircle size={13} className="text-[#3bbfb3]" /> {f}
                     </li>
