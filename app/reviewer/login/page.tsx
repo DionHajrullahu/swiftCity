@@ -21,14 +21,8 @@ export default function ReviewerLoginPage() {
     setError("");
 
     // Read env vars at call-time — guaranteed to exist in the browser bundle
-    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-    if (!url || !key || url.includes("dummy") || url.includes("placeholder")) {
-      setError("Configuration error — please contact the site administrator.");
-      setLoading(false);
-      return;
-    }
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
     const timeoutId = setTimeout(() => {
       setError("Request timed out. Check your connection and try again.");
@@ -37,9 +31,19 @@ export default function ReviewerLoginPage() {
 
     try {
       // Create a fresh client directly — no singleton, no proxy
-      const client = createClient(url, key, {
-        auth: { persistSession: true, autoRefreshToken: true },
-      });
+      const client = createClient(
+        url || "https://placeholder.supabase.co",
+        key || "placeholder",
+        { auth: { persistSession: true, autoRefreshToken: true } }
+      );
+
+      // If env vars are missing the fetch will fail and we catch it below
+      if (!url || url === "https://placeholder.supabase.co") {
+        clearTimeout(timeoutId);
+        setError("Site configuration error. Please try again in a few minutes or contact support.");
+        setLoading(false);
+        return;
+      }
 
       const { data, error: signInError } = await client.auth.signInWithPassword({
         email: email.trim().toLowerCase(),

@@ -155,43 +155,57 @@ function ItineraryCTA({ cityName }: { cityName: string }) {
   const router = useRouter();
   return (
     <div className="mt-16 mx-auto max-w-6xl px-4 sm:px-8 md:px-16">
-      <div className="relative overflow-hidden rounded-3xl bg-[#0d2b3e] px-6 sm:px-10 py-10 sm:py-12">
-        {/* Background glow */}
-        <div className="absolute -top-10 -right-10 w-64 h-64 rounded-full opacity-10 blur-3xl"
-          style={{ background: "radial-gradient(circle, #3bbfb3 0%, transparent 70%)" }} />
+      {/* Outer black card matching the plan page pricing card style */}
+      <div className="relative overflow-hidden rounded-3xl bg-black px-6 sm:px-10 py-10 sm:py-12 border border-yellow-400/20">
+
+        {/* Yellow glow top-right */}
+        <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full opacity-15 blur-3xl"
+          style={{ background: "radial-gradient(circle, #facc15 0%, transparent 70%)" }} />
+
+        {/* BEST VALUE badge */}
+        <div className="absolute top-5 right-5 bg-yellow-400 text-black text-xs font-bold px-3 py-1 rounded-full tracking-wide">
+          SKIP THE PLANNING
+        </div>
 
         <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center gap-8">
+
           {/* Icon */}
-          <div className="w-16 h-16 bg-[#3bbfb3]/20 rounded-2xl flex items-center justify-center flex-shrink-0">
-            <Calendar size={30} className="text-[#3bbfb3]" />
+          <div className="w-16 h-16 bg-yellow-400/10 border border-yellow-400/30 rounded-2xl flex items-center justify-center flex-shrink-0">
+            <Calendar size={30} className="text-yellow-400" />
           </div>
 
           {/* Text */}
           <div className="flex-1">
-            <p className="text-[#3bbfb3] text-xs font-bold uppercase tracking-widest mb-1">Skip the planning</p>
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
-              Get your full 3-day {cityName} itinerary
+            <p className="text-yellow-400 text-xs font-bold uppercase tracking-widest mb-2">3-Day Itinerary</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">
+              Get your full {cityName} trip planned
             </h2>
             <p className="text-white/60 text-sm sm:text-base leading-relaxed max-w-xl">
-              Already browsed the recommendations? The itinerary does the hard work — morning, afternoon, and evening for 3 full days, sequenced so you're never backtracking. Just show up and enjoy.
+              Already browsed the free recommendations? The itinerary does the hard work — morning, afternoon, and evening for 3 full days, sequenced so you're never backtracking. Just show up and enjoy.
             </p>
 
-            <div className="flex flex-wrap gap-4 mt-4 text-sm text-white/50">
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#3bbfb3]"/>3 days fully planned</span>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#3bbfb3]"/>Morning, afternoon & evening</span>
-              <span className="flex items-center gap-1.5"><span className="w-1.5 h-1.5 rounded-full bg-[#3bbfb3]"/>Written by verified locals</span>
+            <div className="flex flex-wrap gap-4 mt-4 text-sm text-white/40">
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"/>3 days fully planned for you
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"/>Morning, afternoon & evening
+              </span>
+              <span className="flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-400"/>Written by verified locals
+              </span>
             </div>
           </div>
 
           {/* CTA */}
-          <div className="flex flex-col items-center gap-2 flex-shrink-0">
+          <div className="flex flex-col items-center gap-2 flex-shrink-0 w-full sm:w-auto">
             <button
               onClick={() => router.push(`/city/${encodeURIComponent(cityName)}/plan`)}
-              className="flex items-center gap-2 bg-[#3bbfb3] hover:bg-[#2da89d] text-white font-semibold px-6 py-3 rounded-xl transition-colors whitespace-nowrap"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-black font-bold px-8 py-3.5 rounded-xl transition-colors whitespace-nowrap text-sm"
             >
               Get itinerary — $4.99 <ArrowRight size={16}/>
             </button>
-            <p className="text-white/30 text-xs">or $9.99/month for all cities</p>
+            <p className="text-white/30 text-xs">or $9.99/month unlocks all 6 cities</p>
           </div>
         </div>
       </div>
