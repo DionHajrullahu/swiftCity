@@ -14,32 +14,33 @@ export type Recommendation = {
   address: string;
   tips: string;
   approved: boolean;
+  media_urls?: string[];
 };
 
-let _supabase: SupabaseClient | null = null;
+// Only create the client in the browser where env vars are guaranteed
+// to be baked in. During SSR/build, return a no-op proxy so nothing crashes.
+let _client: SupabaseClient | null = null;
 
-export function getSupabase(): SupabaseClient {
-  if (_supabase) return _supabase;
+function createSupabaseClient(): SupabaseClient {
+  const url  = process.env.NEXT_PUBLIC_SUPABASE_URL  || "";
+  const key  = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
 
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    // SSR / build time — return a dummy that never gets called
+    return createClient("https://dummy.supabase.co", "dummy-key-for-build-only");
+  }
 
-  // During Next.js build these won't exist — that's fine, the client
-  // is never actually CALLED during build, only during runtime.
-  // We create with empty strings here purely to satisfy the type —
-  // any real call at runtime will use the real env vars baked in by Vercel.
-  _supabase = createClient(url ?? "", key ?? "", {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-    },
+  return createClient(url, key, {
+    auth: { persistSession: true, autoRefreshToken: true },
   });
-
-  return _supabase;
 }
 
+export function getSupabase(): SupabaseClient {
+  if (!_client) _client = createSupabaseClient();
+  return _client;
+}
+
+// Every file that imports `supabase` directly keeps working
 export const supabase = new Proxy({} as SupabaseClient, {
-  get(_target, prop) {
-    return (getSupabase() as any)[prop];
-  },
+  get(_t, prop) { return (getSupabase() as any)[prop]; },
 });
